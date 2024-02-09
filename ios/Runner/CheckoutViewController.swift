@@ -27,11 +27,11 @@ class CheckoutViewController: UIViewController {
         button.isEnabled = false
         return button
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         super.viewDidLoad()
-        StripeAPI.defaultPublishableKey = stripePublishableKey //"pk_test_51OgVTmH7FzagETwqhZyfZMuo4eWHEkQAiAcwPgv5zH1x65ErSWQWnkpu4vasErhCYGn8VQJykW3UcYQSuIwPGSoi00cvQeqNsF"
+        StripeAPI.defaultPublishableKey = stripePublishableKey
         
         view.backgroundColor = .systemBackground
         view.addSubview(payButton)
