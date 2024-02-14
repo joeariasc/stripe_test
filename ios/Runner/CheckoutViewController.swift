@@ -30,7 +30,6 @@ class CheckoutViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        super.viewDidLoad()
         StripeAPI.defaultPublishableKey = stripePublishableKey
         
         view.backgroundColor = .systemBackground
