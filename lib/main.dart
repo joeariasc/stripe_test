@@ -69,7 +69,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> initialize() async {
     try {
       final arguments = {
-        'stripePublishableKey': dotenv.env['DEFAULT_PUBLISHABLE_KEY']
+        'stripePublishableKey': dotenv.env['DEFAULT_PUBLISHABLE_KEY'],
+        'serverHost': dotenv.env['SERVER_HOST']
       };
       final String newResult = await _channel.invokeMethod('test', arguments);
       setState(() => _result = newResult);
