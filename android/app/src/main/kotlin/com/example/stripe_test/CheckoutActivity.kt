@@ -22,12 +22,14 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 class CheckoutActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "CheckoutActivity"
-        private const val BACKEND_URL = "http://10.0.2.2:3000"
     }
+
+    private lateinit var backedUrl: String
 
     private lateinit var paymentIntentClientSecret: String
     private lateinit var paymentSheet: PaymentSheet
@@ -56,7 +58,8 @@ class CheckoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_checkout)
 
-        publishableKey = intent.getStringExtra("PUBLISHABLE_KEY") ?: ""
+        publishableKey = intent.getStringExtra(PUBLISHABLE_KEY) ?: ""
+        backedUrl = intent.getStringExtra(BACKEND_URL) ?: ""
 
         PaymentConfiguration.init(applicationContext, publishableKey)
 
@@ -78,7 +81,7 @@ class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun fetchPaymentIntent() {
-        val url = "${CheckoutActivity.BACKEND_URL}/api/payment"
+        val url = "${backedUrl}/api/payment"
 
         val shoppingCartContent = """
             {
@@ -96,25 +99,28 @@ class CheckoutActivity : AppCompatActivity() {
             .post(body)
             .build()
 
-        OkHttpClient()
-            .newCall(request)
-            .enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    showAlert("Failed to load data", "Error: $e")
-                }
+        val client = OkHttpClient.Builder()
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .build()
 
-                override fun onResponse(call: Call, response: Response) {
-                    if (!response.isSuccessful) {
-                        showAlert("Failed to load page", "Error: $response")
-                    } else {
-                        val responseData = response.body?.string()
-                        val responseJson = responseData?.let { JSONObject(it) } ?: JSONObject()
-                        paymentIntentClientSecret = responseJson.getString("clientSecret")
-                        runOnUiThread { payButton.isEnabled = true }
-                        Log.i(CheckoutActivity.TAG, "Retrieved PaymentIntent")
-                    }
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                showAlert("Failed to load data", "Error: $e")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    showAlert("Failed to load page", "Error: $response")
+                } else {
+                    val responseData = response.body?.string()
+                    val responseJson = responseData?.let { JSONObject(it) } ?: JSONObject()
+                    paymentIntentClientSecret = responseJson.getString("clientSecret")
+                    runOnUiThread { payButton.isEnabled = true }
+                    Log.i(TAG, "Retrieved PaymentIntent")
                 }
-            })
+            }
+        })
     }
 
     private fun showAlert(title: String, message: String? = null) {
@@ -154,7 +160,7 @@ class CheckoutActivity : AppCompatActivity() {
             }
 
             is PaymentSheetResult.Canceled -> {
-                Log.i(CheckoutActivity.TAG, "Payment canceled!")
+                Log.i(TAG, "Payment canceled!")
             }
 
             is PaymentSheetResult.Failed -> {
