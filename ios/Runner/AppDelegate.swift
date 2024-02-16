@@ -40,8 +40,10 @@ extension AppDelegate {
             case "test":
                 guard let args = call.arguments as? [String: String] else {return}
                 let stripePublishableKey = args["stripePublishableKey"]!
+                let backendURL = args["serverHost"]!
                 let vc = UIStoryboard.init(name: "Main", bundle: .main).instantiateViewController(identifier: "CheckoutViewController") as! CheckoutViewController
                 vc.stripePublishableKey = stripePublishableKey
+                vc.serverHost = backendURL
                 vc.result = result
                 self.navigationController.pushViewController(vc, animated: true)
             default:

@@ -10,11 +10,13 @@ import StripePaymentSheet
 
 class CheckoutViewController: UIViewController {
     
-    private static let backendURL = URL(string: "http://localhost:3000")!
+    
     private var paymentIntentClientSecret: String?
     
     var stripePublishableKey: String!
+    var serverHost: String!
     var result: FlutterResult!
+    private lazy var backendURL = URL(string: serverHost)!
     
     private lazy var payButton: UIButton = {
         let button = UIButton(type: .custom)
@@ -46,7 +48,7 @@ class CheckoutViewController: UIViewController {
     }
     
     func fetchPaymentIntent() {
-        let url = Self.backendURL.appendingPathComponent("/api/payment")
+        let url = backendURL.appendingPathComponent("/api/payment")
         
         let shoppingCartContent: [String: Any] = [
             "items": [
