@@ -14,6 +14,7 @@ class CheckoutViewController: UIViewController {
     private var paymentIntentClientSecret: String?
     
     var stripePublishableKey: String!
+    var amount: String!
     var serverHost: String!
     var result: FlutterResult!
     private lazy var backendURL = URL(string: serverHost)!
@@ -53,7 +54,8 @@ class CheckoutViewController: UIViewController {
         let shoppingCartContent: [String: Any] = [
             "items": [
                 ["id": "xl-shirt"]
-            ]
+            ],
+            "amount": amount
         ]
         
         var request = URLRequest(url: url)
