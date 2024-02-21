@@ -62,7 +62,8 @@ class CartPage extends StatelessWidget {
                               style: const TextStyle(fontSize: 18),
                             ),
                             subtitle: Text(
-                              '\$' + value.cartItems[index][1],
+                              "\$ ${value.cartItems[index][1]}",
+                              //'\$' + value.cartItems[index][1],
                               style: const TextStyle(fontSize: 12),
                             ),
                             trailing: IconButton(
@@ -86,7 +87,8 @@ class CartPage extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.green,
+                    color:
+                        value.cartItems.isNotEmpty ? Colors.green : Colors.grey,
                   ),
                   padding: const EdgeInsets.all(24),
                   child: Row(
@@ -113,7 +115,9 @@ class CartPage extends StatelessWidget {
                         ],
                       ),
                       GestureDetector(
-                        onTap: () => initialize(value.totalAmount()),
+                        onTap: value.cartItems.isNotEmpty
+                            ? () => initialize(value.totalAmount())
+                            : null,
                         child: // pay now
                             Container(
                           decoration: BoxDecoration(
@@ -121,13 +125,13 @@ class CartPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(28),
                           ),
                           padding: const EdgeInsets.all(12),
-                          child: const Row(
+                          child:  Row(
                             children: [
                               Text(
-                                'Pay Now',
-                                style: TextStyle(color: Colors.white),
+                                value.cartItems.isNotEmpty ? 'Pay Now' : 'Add Product First',
+                                style: const TextStyle(color: Colors.white),
                               ),
-                              Icon(
+                              const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.white,
