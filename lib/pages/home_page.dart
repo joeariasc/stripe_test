@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:stripe_test/components/car_floating_button.dart';
 import '../components/grocery_item_title.dart';
 import '../model/cart_model.dart';
-import 'cart_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
