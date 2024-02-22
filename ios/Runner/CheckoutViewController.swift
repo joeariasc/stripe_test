@@ -10,11 +10,16 @@ import StripePaymentSheet
 
 class CheckoutViewController: UIViewController {
     
-    private static let backendURL = URL(string: "http://localhost:3000")!
+    
     private var paymentIntentClientSecret: String?
     
     var stripePublishableKey: String!
+    var amount: String!
+    var serverHost: String!
+    var cartItems: [[String]] = []
     var result: FlutterResult!
+    private lazy var backendURL = URL(string: serverHost)!
+    private var tableView: UITableView!
     
     private lazy var payButton: UIButton = {
         let button = UIButton(type: .custom)
@@ -30,28 +35,49 @@ class CheckoutViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupTableView()
         StripeAPI.defaultPublishableKey = stripePublishableKey
         
         view.backgroundColor = .systemBackground
         view.addSubview(payButton)
+        view.addSubview(tableView)
         
-        NSLayoutConstraint.activate([
-            payButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            payButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            payButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
-        ])
+        setupConstraints()
         
         
         self.fetchPaymentIntent()
     }
     
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            payButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            payButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            payButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
+            tableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
+            tableView.bottomAnchor.constraint(equalTo: payButton.topAnchor, constant: -20)
+        ])
+    }
+    
+    private func setupTableView() {
+        tableView = UITableView()
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableView)
+        
+        // Register a simple UITableViewCell for your content
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ItemCell")
+    }
+    
     func fetchPaymentIntent() {
-        let url = Self.backendURL.appendingPathComponent("/api/payment")
+        let url = backendURL.appendingPathComponent("/api/payment")
         
         let shoppingCartContent: [String: Any] = [
             "items": [
                 ["id": "xl-shirt"]
-            ]
+            ],
+            "amount": amount
         ]
         
         var request = URLRequest(url: url)
@@ -84,10 +110,16 @@ class CheckoutViewController: UIViewController {
     }
     
     func displayAlert(title: String, message: String? = nil) {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let strongSelf = self else { return }
             let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alertController.addAction(UIAlertAction(title: "OK", style: .default))
-            self.present(alertController, animated: true)
+            alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                if let appDelegate = UIApplication.shared.delegate as? AppDelegate{
+                    appDelegate.stripeChannel.invokeMethod("paymentSuccess", arguments: nil)
+                }
+                strongSelf.navigationController?.popViewController(animated: true)
+            }))
+            strongSelf.present(alertController, animated: true)
         }
     }
     
@@ -116,4 +148,19 @@ class CheckoutViewController: UIViewController {
             }
         }
     }
+}
+
+extension CheckoutViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return cartItems.count
+        }
+        
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCell", for: indexPath)
+            
+            let item = cartItems[indexPath.row]
+            cell.textLabel?.text = "\(item[0]): $\(item[1])"
+            
+            return cell
+        }
 }

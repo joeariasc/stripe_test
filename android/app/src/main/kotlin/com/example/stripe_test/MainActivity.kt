@@ -1,16 +1,13 @@
 package com.example.stripe_test
 
 import android.content.Intent
-import android.os.Bundle
-import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 
 class MainActivity : FlutterActivity() {
-    private val METHOD_CHANNEL_NAME: String = "co.wawand/stripe"
     private lateinit var result: MethodChannel.Result
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -21,7 +18,7 @@ class MainActivity : FlutterActivity() {
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "test" -> {
-                    val args = call.arguments as? Map<String, String>
+                    val args = call.arguments as? Map<*, *>
                     //publishableKey = args?.get("stripePublishableKey") ?: ""
                     //result.success("Android Say Hello ${args?.get("name")}")
                     startCheckoutActivity(args, result)
@@ -32,9 +29,14 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun startCheckoutActivity(args: Map<String, String>?, result: MethodChannel.Result) {
+    private fun startCheckoutActivity(args: Map<*, *>?, result: MethodChannel.Result) {
+        val carItems = args?.get(CAR_ITEMS) as List<*>
+        val jsonCartItems = Gson().toJson(carItems)
         val intent = Intent(this, CheckoutActivity::class.java).apply {
-            putExtra("PUBLISHABLE_KEY", args?.get("stripePublishableKey") ?: "")
+            putExtra(PUBLISHABLE_KEY, args[STRIPE_PUBLISHABLE_KEY] as String)
+            putExtra(BACKEND_URL, args[SERVER_HOST] as String)
+            putExtra(AMOUNT, args[AMOUNT] as String)
+            putExtra(JSON_CAR_ITEMS, jsonCartItems)
         }
         this.result = result
         startActivityForResult(intent, 120)
