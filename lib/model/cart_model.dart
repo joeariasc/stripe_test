@@ -28,6 +28,14 @@ class CartModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  List extractItemNameAndPrice() {
+    var itemNameAndPriceList = _cartItems.map((item) {
+      return [item[0], item[1]].toList();
+    }).toList();
+
+    return itemNameAndPriceList;
+  }
+
   // calculate total price
   String calculateTotal() {
     double totalPrice = 0;
@@ -37,7 +45,7 @@ class CartModel extends ChangeNotifier {
     return totalPrice.toStringAsFixed(2);
   }
 
-  double totalAmount(){
+  double totalAmount() {
     double totalPrice = 0;
     for (int i = 0; i < cartItems.length; i++) {
       totalPrice += double.parse(cartItems[i][1]);
