@@ -111,15 +111,14 @@ class CheckoutViewController: UIViewController {
     
     func displayAlert(title: String, message: String? = nil) {
         DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
             let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
             alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
                 if let appDelegate = UIApplication.shared.delegate as? AppDelegate{
                     appDelegate.stripeChannel.invokeMethod("paymentSuccess", arguments: nil)
                 }
-                strongSelf.navigationController?.popViewController(animated: true)
+                self?.navigationController?.popViewController(animated: true)
             }))
-            strongSelf.present(alertController, animated: true)
+            self?.present(alertController, animated: true)
         }
     }
     
